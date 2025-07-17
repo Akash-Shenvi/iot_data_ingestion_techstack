@@ -1,23 +1,29 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const PORT = 3000;
 
-app.use(express.static('public'));
 app.set('view engine', 'ejs');
+app.use(express.static('public'));
 app.use(bodyParser.json());
 
-// Serve form
+// Render EJS frontend
 app.get('/', (req, res) => {
-    res.render('index');
+  res.render('index');
 });
 
 // Receive sensor data
-app.post('/submit-sensor', (req, res) => {
-    console.log('Sensor data received:', req.body);
-    res.json({ status: 'OK', received: req.body });
+app.post('/api/sensor-data', (req, res) => {
+  console.log('Received data:', req.body);
+  console.log("T1")
+  console.log(new Date());
+  console.log("T2=Total time taken to recieve i.e T2=T1-T0")
+  t2= new Date() - new Date(req.body.timestamp);
+  console.log(`${t2} in ms`);
+
+  res.status(200).send({ status: 'success' });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+// Start server
+app.listen(3000, () => {
+  console.log('Server running on http://localhost:3000');
 });

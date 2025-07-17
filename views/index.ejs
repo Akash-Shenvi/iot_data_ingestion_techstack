@@ -1,17 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Sensor Input</title>
+    <meta charset="UTF-8">
+    <title>Sensor Data Logger</title>
+    <script>
+        // Generate and store unique ID once
+        if (!localStorage.getItem("device_id")) {
+            localStorage.setItem("device_id", "dev-" + Math.random().toString(36).substr(2, 9));
+        }
+
+        const deviceId = localStorage.getItem("device_id");
+
+        // Function to generate fake sensor data (e.g., random acceleration value)
+        function getSensorData() {
+            return {
+                acceleration: (Math.random() * 10).toFixed(2), // just an example
+            };
+        }
+
+        // Ping backend every second with sensor data
+        setInterval(() => {
+            const payload = {
+                id: deviceId,
+                timestamp: new Date(),
+                sensor_data: getSensorData(),
+            };
+
+            fetch('/api/sensor-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error("Network response was not ok");
+                    console.log("Data sent:", payload);
+                })
+                .catch(error => console.error("Error sending data:", error));
+        }, 1000);
+    </script>
 </head>
 
 <body>
-    <h1>Sensor Input from Laptop</h1>
-    <button onclick="sendSensorData()">Send Sensor Data</button>
-
-    <p id="status"></p>
-
-    <script src="/script.js"></script>
+    <h1>Sensor Logger Running...</h1>
 </body>
 
 </html>
