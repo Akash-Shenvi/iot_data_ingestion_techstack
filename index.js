@@ -13,12 +13,14 @@ app.get('/', (req, res) => {
 
 // Receive sensor data
 app.post('/api/sensor-data', (req, res) => {
+    console.log("--------------------------")
   console.log('Received data:', req.body);
-  console.log("T1")
-  console.log(new Date());
+  console.log(`T0 Time Stamp is = ${new Date(req.body.timestamp).toISOString()}`)
+  console.log(`T1 Timestamp=${new Date().toISOString()}`);
   console.log("T2=Total time taken to recieve i.e T2=T1-T0")
   t2= new Date() - new Date(req.body.timestamp);
   console.log(`${t2} in ms`);
+  console.log("--------------------------")
 
   res.status(200).send({ status: 'success' });
 });
