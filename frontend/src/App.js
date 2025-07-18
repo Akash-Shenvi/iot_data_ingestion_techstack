@@ -3,15 +3,56 @@ import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 
 const SensorReader = () => {
-  const [uniqueID] = useState(uuidv4());
-  const [intervalTime, setIntervalTime] = useState(1000); // default 1 sec
+  const [uniqueID] = useState(() => {
+    // Persist uniqueID across sessions
+    const storedID = localStorage.getItem("browser-uuid");
+    if (storedID) return storedID;
+    const newID = uuidv4();
+    localStorage.setItem("browser-uuid", newID);
+    return newID;
+  });
+
   const [backendURL, setBackendURL] = useState("");
+  const [intervalMs, setIntervalMs] = useState(1000);
   const [isRunning, setIsRunning] = useState(false);
+  const [sensorData, setSensorData] = useState({});
   const intervalRef = useRef(null);
 
-  const [sensorData, setSensorData] = useState({});
+  const readSensorData = () => {
+    // You can extend this using more browser APIs
+    return {
+      alpha: sensorData.alpha || null,
+      beta: sensorData.beta || null,
+      gamma: sensorData.gamma || null,
+    };
+  };
 
-  // Read browser sensor data (example: Device Orientation)
+  const sendDataToBackend = () => {
+    const payload = {
+      uniqueID,
+      t0: new Date().toISOString(),
+      sensorData: readSensorData(),
+    };
+
+    axios
+      .post(backendURL, payload)
+      .then(() => console.log("Data sent:", payload))
+      .catch((err) => console.error("Send failed:", err.message));
+  };
+
+  const start = () => {
+    if (!backendURL) return alert("Please enter the backend URL");
+    window.addEventListener("deviceorientation", handleOrientation);
+    intervalRef.current = setInterval(sendDataToBackend, intervalMs);
+    setIsRunning(true);
+  };
+
+  const stop = () => {
+    window.removeEventListener("deviceorientation", handleOrientation);
+    clearInterval(intervalRef.current);
+    setIsRunning(false);
+  };
+
   const handleOrientation = (event) => {
     setSensorData({
       alpha: event.alpha,
@@ -20,81 +61,52 @@ const SensorReader = () => {
     });
   };
 
-  const sendSensorData = () => {
-    const timestamp = new Date().toISOString();
-    const data = {
-      uniqueID,
-      timestamp,
-      sensorData,
-    };
-    if (backendURL) {
-      axios
-        .post(backendURL, data)
-        .then(() => console.log("Sent:", data))
-        .catch((err) => console.error("Error:", err));
-    }
-  };
-
-  const startReading = () => {
-    if (!backendURL) return alert("Set backend URL!");
-    window.addEventListener("deviceorientation", handleOrientation);
-    intervalRef.current = setInterval(sendSensorData, intervalTime);
-    setIsRunning(true);
-  };
-
-  const stopReading = () => {
-    clearInterval(intervalRef.current);
-    window.removeEventListener("deviceorientation", handleOrientation);
-    setIsRunning(false);
-  };
-
   useEffect(() => {
     return () => {
-      stopReading();
+      stop();
     };
   }, []);
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">
-      <h2 className="text-xl font-semibold">Browser Sensor Reader</h2>
-      <p>Unique ID: <code className="text-sm">{uniqueID}</code></p>
+    <div className="container">
+      <h2>🛰️ Browser Sensor Data Logger</h2>
 
-      <label className="block">
-        Backend URL:
+      <p><strong>Unique Browser ID:</strong><br /><code>{uniqueID}</code></p>
+
+      <label>
+        Backend API URL:
         <input
           type="text"
+          placeholder="https://your-backend-url/api/sensor"
           value={backendURL}
           onChange={(e) => setBackendURL(e.target.value)}
-          className="mt-1 block w-full p-2 border rounded"
         />
       </label>
 
-      <label className="block">
-        Read Interval (ms):
+      <label>
+        Sensor Read Interval (ms):
         <input
           type="number"
-          value={intervalTime}
-          onChange={(e) => setIntervalTime(Number(e.target.value))}
-          className="mt-1 block w-full p-2 border rounded"
+          value={intervalMs}
+          onChange={(e) => setIntervalMs(Number(e.target.value))}
         />
       </label>
 
-      <div className="flex space-x-4">
-        {!isRunning ? (
-          <button
-            onClick={startReading}
-            className="bg-green-500 text-white px-4 py-2 rounded"
-          >
-            Start
-          </button>
-        ) : (
-          <button
-            onClick={stopReading}
-            className="bg-red-500 text-white px-4 py-2 rounded"
-          >
-            Stop
-          </button>
-        )}
+      <div className="button-group">
+        <button
+          onClick={start}
+          className="start"
+          disabled={isRunning}
+        >
+          Start Logging
+        </button>
+        <button
+          onClick={stop}
+          className="stop"
+          disabled={!isRunning}
+        >
+          Stop Logging
+        </button>
       </div>
     </div>
   );

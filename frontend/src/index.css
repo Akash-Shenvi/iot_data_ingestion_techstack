@@ -66,3 +66,70 @@ code {
   font-size: 13px;
   color: #333;
 }
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #eef2f3;
+  margin: 0;
+  padding: 40px;
+}
+
+.container {
+  background: #fff;
+  padding: 30px;
+  max-width: 500px;
+  margin: auto;
+  border-radius: 10px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 10px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  margin-right: 10px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+button.start {
+  background-color: #28a745;
+  color: white;
+}
+
+button.stop {
+  background-color: #dc3545;
+  color: white;
+}
+
+code {
+  background: #f1f1f1;
+  padding: 4px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 6px;
+}
