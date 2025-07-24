@@ -1,54 +1,57 @@
-Browser Sensor Data Collector
+# Browser Sensor Data Collector
+
 This project provides a simple, modern web frontend designed to collect sensor data directly from the user's browser, assign a unique identifier to each browser instance, and send this data, along with timestamps, to a specified backend endpoint at a user-defined interval.
 
 It's built with standard web technologies (HTML, CSS, JavaScript) and utilizes Web APIs for sensor access.
 
-Features
-Unique Browser ID Generation: Automatically generates and stores a unique ID for each browser instance using localStorage, ensuring consistent tracking across sessions.
+---
 
-Geolocation Data Collection: Reads latitude, longitude, and accuracy using the Geolocation API.
+## Features
 
-Ambient Light Data Collection: Gathers ambient light intensity (illuminance in lux) via the Ambient Light Sensor API.
+* **Unique Browser ID Generation**: Automatically generates and stores a unique ID for each browser instance using `localStorage`, ensuring consistent tracking across sessions.
+* **Geolocation Data Collection**: Reads latitude, longitude, and accuracy using the Geolocation API.
+* **Ambient Light Data Collection**: Gathers ambient light intensity (illuminance in lux) via the Ambient Light Sensor API.
+* **Customizable Collection Interval**: Users can select the data collection frequency (1, 2, 5, 10, 30, or 60 seconds) using a dropdown.
+* **Start/Stop Controls**: Dedicated buttons to easily begin and cease data collection.
+* **Real-time Display**: Shows collected sensor data in a neatly formatted table on the frontend, updated with each reading.
+* **Backend Integration**: Sends collected data (unique ID, timestamp, sensor readings) as a JSON payload to a configurable backend endpoint.
+* **Attractive UI**: Features a clean design with hover effects on buttons for a better user experience.
 
-Customizable Collection Interval: Users can select the data collection frequency (1, 2, 5, 10, 30, or 60 seconds) using a dropdown.
+---
 
-Start/Stop Controls: Dedicated buttons to easily begin and cease data collection.
+## Getting Started
 
-Real-time Display: Shows collected sensor data in a neatly formatted table on the frontend, updated with each reading.
-
-Backend Integration: Sends collected data (unique ID, timestamp, sensor readings) as a JSON payload to a configurable backend endpoint.
-
-Attractive UI: Features a clean design with hover effects on buttons for a better user experience.
-
-Getting Started
 Follow these steps to get the project up and running on your local machine.
 
-Prerequisites
-A modern web browser (e.g., Chrome, Firefox, Edge, Safari) that supports Geolocation API and Ambient Light Sensor API.
+### Prerequisites
 
-HTTPS (Highly Recommended): Many browser sensor APIs, including the Ambient Light Sensor, require a secure context (HTTPS) to function. If you open index.html directly from your file system (file:// URL), sensor data might not be accessible, or you may encounter repeated permission prompts. For full functionality, serve the files using a local web server (see below).
+* A modern web browser (e.g., Chrome, Firefox, Edge, Safari) that supports Geolocation API and Ambient Light Sensor API.
+* **HTTPS (Highly Recommended)**: Many browser sensor APIs, including the Ambient Light Sensor, require a **secure context (HTTPS)** to function. If you open `index.html` directly from your file system (`file://` URL), sensor data might not be accessible, or you may encounter repeated permission prompts. For full functionality, serve the files using a local web server (see below).
 
-Installation
-Clone the Repository (or Download):
+### Installation
 
-Bash
+1.  **Clone the Repository (or Download):**
+    ```bash
+    git clone [https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git](https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git)
+    cd YOUR_REPOSITORY_NAME
+    ```
+    (Replace `YOUR_USERNAME` and `YOUR_REPOSITORY_NAME` with your actual GitHub details.)
 
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
-cd YOUR_REPOSITORY_NAME
-(Replace YOUR_USERNAME and YOUR_REPOSITORY_NAME with your actual GitHub details.)
+2.  **Navigate to the Project Directory:**
+    Ensure you are in the folder containing `index.html`, `style.css`, and `script.js`.
 
-Navigate to the Project Directory:
-Ensure you are in the folder containing index.html, style.css, and script.js.
+---
 
-Usage
-1. Configure Your Backend Endpoint
-Open script.js and find the sendDataToBackend function. Replace 'YOUR_BACKEND_ENDPOINT_HERE' with the actual URL of your backend server where you want to send the sensor data.
+## Usage
 
-JavaScript
+### 1. Configure Your Backend Endpoint
 
+Open `script.js` and find the `sendDataToBackend` function. Replace `'YOUR_BACKEND_ENDPOINT_HERE'` with the actual URL of your backend server where you want to send the sensor data.
+
+```javascript
 // script.js
 async function sendDataToBackend(data) {
-    const backendUrl = 'https://your-actual-backend-api.com/sensor-data'; // <--- CHANGE THIS
+    const backendUrl = '[https://your-actual-backend-api.com/sensor-data](https://your-actual-backend-api.com/sensor-data)'; // <--- CHANGE THIS
     // ... rest of the function
 }
 2. Run Locally (Recommended via Web Server)
