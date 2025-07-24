@@ -1,70 +1,112 @@
-# Getting Started with Create React App
+Browser Sensor Data Collector
+This project provides a simple, modern web frontend designed to collect sensor data directly from the user's browser, assign a unique identifier to each browser instance, and send this data, along with timestamps, to a specified backend endpoint at a user-defined interval.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+It's built with standard web technologies (HTML, CSS, JavaScript) and utilizes Web APIs for sensor access.
 
-## Available Scripts
+Features
+Unique Browser ID Generation: Automatically generates and stores a unique ID for each browser instance using localStorage, ensuring consistent tracking across sessions.
 
-In the project directory, you can run:
+Geolocation Data Collection: Reads latitude, longitude, and accuracy using the Geolocation API.
 
-### `npm start`
+Ambient Light Data Collection: Gathers ambient light intensity (illuminance in lux) via the Ambient Light Sensor API.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Customizable Collection Interval: Users can select the data collection frequency (1, 2, 5, 10, 30, or 60 seconds) using a dropdown.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Start/Stop Controls: Dedicated buttons to easily begin and cease data collection.
 
-### `npm test`
+Real-time Display: Shows collected sensor data in a neatly formatted table on the frontend, updated with each reading.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Backend Integration: Sends collected data (unique ID, timestamp, sensor readings) as a JSON payload to a configurable backend endpoint.
 
-### `npm run build`
+Attractive UI: Features a clean design with hover effects on buttons for a better user experience.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Getting Started
+Follow these steps to get the project up and running on your local machine.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Prerequisites
+A modern web browser (e.g., Chrome, Firefox, Edge, Safari) that supports Geolocation API and Ambient Light Sensor API.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+HTTPS (Highly Recommended): Many browser sensor APIs, including the Ambient Light Sensor, require a secure context (HTTPS) to function. If you open index.html directly from your file system (file:// URL), sensor data might not be accessible, or you may encounter repeated permission prompts. For full functionality, serve the files using a local web server (see below).
 
-### `npm run eject`
+Installation
+Clone the Repository (or Download):
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Bash
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
+cd YOUR_REPOSITORY_NAME
+(Replace YOUR_USERNAME and YOUR_REPOSITORY_NAME with your actual GitHub details.)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Navigate to the Project Directory:
+Ensure you are in the folder containing index.html, style.css, and script.js.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Usage
+1. Configure Your Backend Endpoint
+Open script.js and find the sendDataToBackend function. Replace 'YOUR_BACKEND_ENDPOINT_HERE' with the actual URL of your backend server where you want to send the sensor data.
 
-## Learn More
+JavaScript
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+// script.js
+async function sendDataToBackend(data) {
+    const backendUrl = 'https://your-actual-backend-api.com/sensor-data'; // <--- CHANGE THIS
+    // ... rest of the function
+}
+2. Run Locally (Recommended via Web Server)
+To ensure all sensor APIs function correctly, especially the Ambient Light Sensor, it's best to serve the files using a simple local HTTP server.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Using Python's Simple HTTP Server:
+If you have Python installed, navigate to your project directory in the terminal and run:
 
-### Code Splitting
+Bash
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+python -m http.server 8000
+Then, open your browser and go to http://localhost:8000.
 
-### Analyzing the Bundle Size
+Using Node.js http-server (if you have Node.js):
+Install http-server globally:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Bash
 
-### Making a Progressive Web App
+npm install -g http-server
+Navigate to your project directory in the terminal and run:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Bash
 
-### Advanced Configuration
+http-server -p 8000 -S
+The -S flag enables HTTPS, which is crucial for some sensor APIs. You might get a certificate warning, which you can usually bypass for local development. Then, open your browser and go to https://localhost:8000.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+3. Using the Frontend
+Once the page loads, you'll see a Unique Browser Instance ID. This ID is unique to your browser and will persist across sessions.
 
-### Deployment
+Select your desired Collection Interval (in seconds) from the dropdown.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Click the "Start Collection" button.
 
-### `npm run build` fails to minify
+Your browser will likely prompt you for permissions to access your Geolocation and potentially the Ambient Light Sensor. Grant these permissions for data collection to proceed.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+The table will start populating with new sensor readings at your chosen interval.
+
+Messages indicating successful or failed backend data sends will briefly appear in the table.
+
+Click the "Stop Collection" button to halt data gathering.
+
+Sensor Data Payload Format
+The data sent to your backend will be a JSON object with the following structure:
+
+JSON
+
+{
+    "timestamp": "2025-07-24T16:00:00.000Z", // ISO 8601 format
+    "browserInstanceId": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx",
+    "geolocation": {
+        "latitude": 12.9716,
+        "longitude": 77.5946,
+        "accuracy": 15.0, // in meters
+        "error": null    // or an error message if geolocation failed
+    },
+    "ambientLight": {
+        "illuminance": 150.75, // in lux
+        "error": null          // or an error message if ambient light reading failed or not supported
+    }
+}
+If a sensor is not supported by the browser or permission is denied, its corresponding error field will contain a descriptive message, and the data fields will be null or 'N/A'.
