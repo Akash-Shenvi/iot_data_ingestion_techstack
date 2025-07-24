@@ -76,7 +76,9 @@ Navigate to your project directory in the terminal and run:
 Bash
 
 http-server -p 8000 -S
-The -S flag enables HTTPS, which is crucial for some sensor APIs. You might get a certificate warning, which you can usually bypass for local development. Then, open your browser and go to https://localhost:8000.
+The -S flag enables HTTPS, which is crucial for some sensor APIs. You might get
+a certificate warning, which you can usually bypass for local development.
+Then, open your browser and go to https://localhost:8000.
 
 3. Using the Frontend
 Once the page loads, you'll see a Unique Browser Instance ID. This ID is unique to your browser and will persist across sessions.
@@ -85,7 +87,9 @@ Select your desired Collection Interval (in seconds) from the dropdown.
 
 Click the "Start Collection" button.
 
-Your browser will likely prompt you for permissions to access your Geolocation and potentially the Ambient Light Sensor. Grant these permissions for data collection to proceed.
+Your browser will likely prompt you for permissions to access your Geolocation
+and potentially the Ambient Light Sensor. Grant these permissions for
+data collection to proceed.
 
 The table will start populating with new sensor readings at your chosen interval.
 
@@ -112,4 +116,6 @@ JSON
         "error": null          // or an error message if ambient light reading failed or not supported
     }
 }
-If a sensor is not supported by the browser or permission is denied, its corresponding error field will contain a descriptive message, and the data fields will be null or 'N/A'.
+If a sensor is not supported by the browser or permission is denied,
+its corresponding error field will contain a descriptive message,
+and the data fields will be null or 'N/A'.
