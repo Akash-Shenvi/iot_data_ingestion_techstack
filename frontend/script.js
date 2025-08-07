@@ -27,10 +27,16 @@ function getOrCreateUniqueId() {
 // Collects sensor data using Web APIs
 async function collectSensorData() {
     const data = {
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().getTime(), // Changed to milliseconds (UTC)
         browserInstanceId: BROWSER_INSTANCE_ID,
-        geolocation: {},
-        ambientLight: {}
+        geolocation: {
+            latitude: 0.0,    // Default value
+            longitude: 0.0,   // Default value
+            accuracy: 0.0     // Default value
+        },
+        ambientLight: {
+            illuminance: 0.0  // Default value
+        }
     };
 
     // --- Geolocation Data Collection ---
@@ -47,14 +53,14 @@ async function collectSensorData() {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
                 accuracy: position.coords.accuracy,
-                error: null
             };
         } catch (error) {
-            data.geolocation.error = error.message;
-            console.warn("Geolocation error:", error);
+            // Geolocation failed or denied, defaults (0.0) remain
+            console.warn("Geolocation error:", error.message);
         }
     } else {
-        data.geolocation.error = "Geolocation not supported";
+        // Geolocation not supported, defaults (0.0) remain
+        console.warn("Geolocation not supported.");
     }
 
     // --- Ambient Light Sensor Data Collection ---
@@ -82,14 +88,14 @@ async function collectSensorData() {
             });
             data.ambientLight = {
                 illuminance: lightReading.toFixed(2), // Format to 2 decimal places
-                error: null
             };
         } catch (error) {
-            data.ambientLight.error = error.message;
-            console.warn("Ambient Light Sensor error:", error);
+            // Ambient Light Sensor failed or denied, default (0.0) remains
+            console.warn("Ambient Light Sensor error:", error.message);
         }
     } else {
-        data.ambientLight.error = "Ambient Light Sensor not supported";
+        // Ambient Light Sensor not supported, default (0.0) remains
+        console.warn("Ambient Light Sensor not supported.");
     }
 
     return data;
@@ -103,19 +109,20 @@ function displayData(data) {
     const row = dataTableBody.insertRow(0); // Insert new row at the top
 
     const timestampCell = row.insertCell();
+    // Display timestamp in a human-readable format, even though it's stored as milliseconds
     timestampCell.textContent = new Date(data.timestamp).toLocaleTimeString();
 
     const latCell = row.insertCell();
-    latCell.textContent = data.geolocation.latitude !== undefined && data.geolocation.latitude !== null ? data.geolocation.latitude.toFixed(6) : (data.geolocation.error || 'N/A');
+    latCell.textContent = data.geolocation.latitude.toFixed(6);
 
     const lonCell = row.insertCell();
-    lonCell.textContent = data.geolocation.longitude !== undefined && data.geolocation.longitude !== null ? data.geolocation.longitude.toFixed(6) : (data.geolocation.error || 'N/A');
+    lonCell.textContent = data.geolocation.longitude.toFixed(6);
 
     const accuracyCell = row.insertCell();
-    accuracyCell.textContent = data.geolocation.accuracy !== undefined && data.geolocation.accuracy !== null ? data.geolocation.accuracy.toFixed(2) : (data.geolocation.error || 'N/A');
+    accuracyCell.textContent = data.geolocation.accuracy.toFixed(2);
 
     const ambientLightCell = row.insertCell();
-    ambientLightCell.textContent = data.ambientLight.illuminance !== undefined && data.ambientLight.illuminance !== null ? data.ambientLight.illuminance : (data.ambientLight.error || 'N/A');
+    ambientLightCell.textContent = data.ambientLight.illuminance; // Display as is (already formatted in collectSensorData)
 }
 
 // Sends the collected data to a backend endpoint
