@@ -16,7 +16,7 @@ function getOrCreateUniqueId() {
         // A simple UUID-like string. For production, consider a robust UUID library.
         uniqueId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
             const r = Math.random() * 16 | 0,
-                  v = c === 'x' ? r : (r & 0x3 | 0x8);
+                v = c === 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
         localStorage.setItem('browserInstanceId', uniqueId);
@@ -24,8 +24,39 @@ function getOrCreateUniqueId() {
     return uniqueId;
 }
 
-// Collects sensor data using Web APIs
+// Generates random, mock sensor data
+function generateRandomSensorData() {
+    // Generate random latitude and longitude
+    const latitude = (Math.random() * 180) - 90; // Latitude ranges from -90 to +90
+    const longitude = (Math.random() * 360) - 180; // Longitude ranges from -180 to +180
+
+    // Generate random ambient light illuminance
+    const illuminance = Math.random() * 1000; // Random illuminance from 0 to 1000 lux
+
+    return {
+        timestamp: new Date().toISOString(),
+        browserInstanceId: BROWSER_INSTANCE_ID,
+        geolocation: {
+            latitude: latitude,
+            longitude: longitude,
+            accuracy: Math.random() * 100, // Random accuracy value
+            error: "Using mock geolocation data."
+        },
+        ambientLight: {
+            illuminance: illuminance.toFixed(2),
+            error: "Using mock ambient light data."
+        }
+    };
+}
+
+// Collects sensor data using Web APIs, or falls back to random data
 async function collectSensorData() {
+    // Check if the browser supports the Web APIs. If not, use mock data.
+    if (!navigator.geolocation && !('AmbientLightSensor' in window)) {
+        console.warn("Geolocation and Ambient Light Sensor not supported. Generating random data.");
+        return generateRandomSensorData();
+    }
+
     const data = {
         timestamp: new Date().getTime(), // Changed to milliseconds (UTC)
         browserInstanceId: BROWSER_INSTANCE_ID,
@@ -45,7 +76,7 @@ async function collectSensorData() {
             const position = await new Promise((resolve, reject) => {
                 navigator.geolocation.getCurrentPosition(resolve, reject, {
                     enableHighAccuracy: true,
-                    timeout: 4000, // Timeout after 4 seconds for geolocation
+                    timeout: 4000,
                     maximumAge: 0
                 });
             });
@@ -59,43 +90,55 @@ async function collectSensorData() {
             console.warn("Geolocation error:", error.message);
         }
     } else {
-        // Geolocation not supported, defaults (0.0) remain
-        console.warn("Geolocation not supported.");
+
+        data.geolocation = {
+            error: "Geolocation not supported. Using mock data."
+        };
+        console.warn("Geolocation not supported. Generating mock data.");
+        const mockData = generateRandomSensorData().geolocation;
+        data.geolocation = mockData;
+
     }
 
     // --- Ambient Light Sensor Data Collection ---
-    // Note: AmbientLightSensor requires secure context (HTTPS) and user permission in some browsers.
     if ('AmbientLightSensor' in window) {
         try {
             const ambientSensor = new AmbientLightSensor();
             const lightReading = await new Promise((resolve, reject) => {
                 ambientSensor.onreading = () => {
                     resolve(ambientSensor.illuminance);
-                    ambientSensor.stop(); // Stop sensor after reading to conserve resources
+                    ambientSensor.stop();
                 };
                 ambientSensor.onerror = (event) => {
                     reject(event.error.name + ': ' + event.error.message);
                 };
                 ambientSensor.start();
 
-                // Set a timeout in case the sensor doesn't provide a reading quickly
                 setTimeout(() => {
-                    if (ambientSensor.state === 'activated') { // Check if sensor is still active
+                    if (ambientSensor.state === 'activated') {
                         ambientSensor.stop();
                         reject("Ambient Light sensor timeout or no reading received.");
                     }
-                }, 1000); // Give it up to 1 second to get a reading
+                }, 1000);
             });
             data.ambientLight = {
-                illuminance: lightReading.toFixed(2), // Format to 2 decimal places
+
+                illuminance: lightReading.toFixed(2),
+                error: null
+
             };
         } catch (error) {
             // Ambient Light Sensor failed or denied, default (0.0) remains
             console.warn("Ambient Light Sensor error:", error.message);
         }
     } else {
-        // Ambient Light Sensor not supported, default (0.0) remains
-        console.warn("Ambient Light Sensor not supported.");
+
+        data.ambientLight = {
+            error: "Ambient Light Sensor not supported. Using mock data."
+        };
+        console.warn("Ambient Light Sensor not supported. Generating mock data.");
+        const mockData = generateRandomSensorData().ambientLight;
+        data.ambientLight = mockData;
     }
 
     return data;
@@ -127,7 +170,7 @@ function displayData(data) {
 
 // Sends the collected data to a backend endpoint
 async function sendDataToBackend(data) {
-    const backendUrl = 'YOUR_BACKEND_ENDPOINT_HERE'; // *** IMPORTANT: Replace with your actual backend endpoint ***
+    const backendUrl = 'http://localhost:3000/api/sensor-data'; // *** IMPORTANT: Replace with your actual backend endpoint ***
     try {
         const response = await fetch(backendUrl, {
             method: 'POST',
@@ -138,19 +181,26 @@ async function sendDataToBackend(data) {
         });
 
         if (response.ok) {
-            const result = await response.json();
-            console.log("Data sent successfully:", result);
+            // Check if the response body is not empty before parsing as JSON
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                const result = await response.json();
+                console.log("Data sent successfully:", result);
+            } else {
+                console.log("Data sent successfully, but no JSON response was received.");
+            }
+            
             const messageRow = dataTableBody.insertRow(0);
             const messageCell = messageRow.insertCell();
-            messageCell.colSpan = 5; // Updated colspan to match number of table columns
+            messageCell.colSpan = 5;
             messageCell.className = 'success-message';
             messageCell.textContent = `Data sent to backend successfully at ${new Date(data.timestamp).toLocaleTimeString()}.`;
-            setTimeout(() => messageRow.remove(), 3000); // Remove message after 3 seconds
+            setTimeout(() => messageRow.remove(), 3000);
         } else {
             console.error("Failed to send data:", response.status, response.statusText);
             const errorRow = dataTableBody.insertRow(0);
             const errorCell = errorRow.insertCell();
-            errorCell.colSpan = 5; // Updated colspan
+            errorCell.colSpan = 5;
             errorCell.className = 'error-message';
             errorCell.textContent = `Failed to send data to backend at ${new Date(data.timestamp).toLocaleTimeString()}: ${response.statusText}`;
             setTimeout(() => errorRow.remove(), 5000);
@@ -159,7 +209,7 @@ async function sendDataToBackend(data) {
         console.error("Error sending data to backend:", error);
         const errorRow = dataTableBody.insertRow(0);
         const errorCell = errorRow.insertCell();
-        errorCell.colSpan = 5; // Updated colspan
+        errorCell.colSpan = 5;
         errorCell.className = 'error-message';
         errorCell.textContent = `Network error sending data at ${new Date(data.timestamp).toLocaleTimeString()}: ${error.message}`;
         setTimeout(() => errorRow.remove(), 5000);
@@ -170,28 +220,24 @@ async function sendDataToBackend(data) {
 startButton.addEventListener('click', async () => {
     startButton.disabled = true;
     stopButton.disabled = false;
-    intervalSelect.disabled = true; // Disable interval selection when collection starts
+    intervalSelect.disabled = true;
 
     if (noDataRow && dataTableBody.contains(noDataRow)) {
-        noDataRow.remove(); // Remove "No data yet" row if present
+        noDataRow.remove();
     }
 
-    // Get the selected interval from the dropdown and convert to milliseconds
     const selectedInterval = parseInt(intervalSelect.value) * 1000;
 
     const collectAndSendData = async () => {
         const data = await collectSensorData();
         displayData(data);
-        // Only send data if collection is still active (sensorInterval is not null)
         if (sensorInterval !== null) {
-           sendDataToBackend(data);
+            sendDataToBackend(data);
         }
     };
 
-    // Perform initial data collection and sending immediately
     await collectAndSendData();
 
-    // Set up interval for subsequent collections
     sensorInterval = setInterval(collectAndSendData, selectedInterval);
 });
 
@@ -199,14 +245,13 @@ startButton.addEventListener('click', async () => {
 stopButton.addEventListener('click', () => {
     startButton.disabled = false;
     stopButton.disabled = true;
-    intervalSelect.disabled = false; // Enable interval selection when collection stops
-    clearInterval(sensorInterval); // Clear the interval to stop data collection
-    sensorInterval = null; // Reset sensorInterval to indicate collection is stopped
+    intervalSelect.disabled = false;
+    clearInterval(sensorInterval);
+    sensorInterval = null;
 
-    // Add a message to the table indicating collection has stopped
     const stopMessageRow = dataTableBody.insertRow(0);
     const stopMessageCell = stopMessageRow.insertCell();
-    stopMessageCell.colSpan = 5; // Updated colspan
+    stopMessageCell.colSpan = 5;
     stopMessageCell.style.textAlign = 'center';
     stopMessageCell.style.fontStyle = 'italic';
     stopMessageCell.style.color = '#777';
