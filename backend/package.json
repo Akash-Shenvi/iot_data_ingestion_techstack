@@ -1,15 +1,7 @@
 {
-  "name": "iotdata-ingestion",
+  "name": "intrn_iotdataingest",
   "version": "1.0.0",
   "description": "",
-  "homepage": "https://github.com/Akash-Shenvi/iot_data_ingestion_techstack#readme",
-  "bugs": {
-    "url": "https://github.com/Akash-Shenvi/iot_data_ingestion_techstack/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Akash-Shenvi/iot_data_ingestion_techstack.git"
-  },
   "license": "ISC",
   "author": "",
   "type": "commonjs",
@@ -19,12 +11,7 @@
   },
   "dependencies": {
     "@google-cloud/bigquery": "^8.1.1",
-    "axios": "^1.10.0",
-    "body-parser": "^2.2.0",
     "cors": "^2.8.5",
-    "ejs": "^3.1.10",
-    "express": "^5.1.0",
-    "nodemon": "^3.1.10",
-    "uuid": "^11.1.0"
+    "express": "^5.1.0"
   }
 }
